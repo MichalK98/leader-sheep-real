@@ -1,0 +1,156 @@
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  title: "Leader Sheep",
+  parent: "game",
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 1000 },
+      debug: false
+    }
+  },
+  scene: {
+    preload,
+    create,
+    update
+  }
+};
+
+var game = new Phaser.Game(config);
+
+function preload() {
+  this.load.image('sky', 'assets/sky.png');
+  this.load.image('pipe', 'assets/pipe.png');
+  this.load.spritesheet(
+    'player',
+    'assets/player.png',
+    {frameWidth: 100, frameHeight: 84}
+  );
+}
+  
+function create() {
+    this.add.image(0, 0, 'sky').setOrigin(0, 0).setScrollFactor(0);
+  
+    pipes = this.physics.add.staticGroup();
+    pipes.create(600, 0, 'pipe');
+    pipes.create(100, 0, 'pipe');
+  
+    var self = this;
+    this.socket = io({
+      transports: ["websocket"]
+    });
+    this.otherPlayers = this.physics.add.group();
+  
+    this.socket.on('currentPlayers', function (players) {
+      Object.keys(players).forEach(function (id) {
+        if (players[id].playerId === self.socket.id) {
+          addPlayer(self, players[id]);
+        } else {
+          addOtherPlayers(self, players[id]);
+        }
+      });
+    });
+  
+    this.socket.on('newPlayer', function (playerInfo) {
+      addOtherPlayers(self, playerInfo);
+    });
+  
+    this.socket.on('disconnect', function (playerId) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerId === otherPlayer.playerId) {
+          otherPlayer.destroy();
+        }
+      });
+    });
+  
+    this.socket.on('playerMoved', function (playerInfo) {
+      self.otherPlayers.getChildren().forEach(function (otherPlayer) {
+        if (playerInfo.playerId === otherPlayer.playerId) {
+          otherPlayer.setRotation(playerInfo.rotation);
+          otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+        }
+      });
+    });
+    
+    // Cursors
+    this.cursors = this.input.keyboard.createCursorKeys();
+    
+    // Camera
+    let camera_width = this.cameras.main.width * Number.MAX_VALUE;
+    let camera_height = this.cameras.main.height;
+  
+    // World size
+    this.cameras.main.setBounds(0, 0, camera_width, camera_height);
+    this.scene.scene.physics.world.setBounds(0, 0, camera_width, camera_height);
+  }
+  
+  function addPlayer(self, playerInfo) {
+    self.player = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
+    self.player.setCollideWorldBounds(true);
+    self.player.setBounce(.2);
+  
+    console.log(self);
+    console.log(self.player);
+    console.log(pipes);
+    self.physics.add.collider(self.player, pipes);
+  }
+  
+  function addOtherPlayers(self, playerInfo) {
+    const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
+  
+  
+    otherPlayer.setTint(0x0000ff);
+  
+    otherPlayer.playerId = playerInfo.playerId;
+    self.otherPlayers.add(otherPlayer);
+    otherPlayer.setCollideWorldBounds(true);
+  }
+  
+  function update() {
+    if (this.player) {
+      // Camera Follow Player
+      this.cameras.main.startFollow(this.player);
+  
+      // Jump
+      if (this.cursors.up.isDown) {
+        if (player_jump) {
+          this.player.setVelocityX(-200);
+          this.player.setVelocityY(-400);
+          player_jump = false;
+        }
+      } else {
+        player_jump = true;
+      }
+  
+      // emit player movement
+      var x = this.player.x;
+      var y = this.player.y;
+      var r = this.player.rotation;
+      
+      if (this.player.oldPosition) {
+        if (this.player.oldPosition && (x !== this.player.oldPosition.x || y !== this.player.oldPosition.y || r !== this.player.oldPosition.rotation)) {
+          this.socket.emit('playerMovement', { x: this.player.x, y: this.player.y, rotation: this.player.rotation });
+        }
+      }
+  
+      // Rotation
+      if (this.player.oldPosition) {
+        if (this.player.oldPosition.y > this.player.y) {
+          this.player.rotation = -.1;
+        } else if (this.player.oldPosition.y < this.player.y) {
+          this.player.rotation = .1;
+        } else {
+          this.player.rotation = 0;
+        }
+      }
+  
+      // save old position data
+      this.player.oldPosition = {
+        x: this.player.x,
+        y: this.player.y,
+        rotation: this.player.rotation
+      };
+    }
+  }
