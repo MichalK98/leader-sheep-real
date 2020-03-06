@@ -34,11 +34,41 @@ function preload() {
 function create() {
     this.add.image(0, 0, 'sky').setOrigin(0, 0).setScrollFactor(0);
     this.add.image(0, 0, 'intro').setOrigin(0, 0);
+
+    this.anims.create({
+      key: 'player-stand',
+      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 0 }),
+      frameRate:
+      10,
+    });
+
+    // Slide Animations
+    this.anims.create({
+      key: 'player-slide',
+      frames: this.anims.generateFrameNumbers('player', { start: 0, end: 4 }),
+      frameRate: 10,
+      repeat: -1
+    });
   
     pipes = this.physics.add.staticGroup();
     pipes.create(500, -200, 'pipe');
+    pipes.create(650, 600, 'pipe');
+    pipes.create(700, 600, 'pipe');
+    pipes.create(750, 600, 'pipe');
+    pipes.create(800, 600, 'pipe');
+    pipes.create(850, 600, 'pipe');
+    pipes.create(900, 600, 'pipe');
+    pipes.create(950, 600, 'pipe');
     pipes.create(1000, 600, 'pipe');
-    pipes.create(1500, 400, 'pipe');
+    pipes.create(1050, 600, 'pipe');
+    pipes.create(1100, 600, 'pipe');
+    pipes.create(1150, 600, 'pipe');
+    pipes.create(1200, 600, 'pipe');
+    pipes.create(1250, 600, 'pipe');
+    pipes.create(1300, 600, 'pipe');
+    pipes.create(1350, 600, 'pipe');
+    pipes.create(1400, 600, 'pipe');
+    pipes.create(1550, 400, 'pipe');
   
     var self = this;
     this.socket = io({
@@ -107,9 +137,8 @@ function create() {
   
   function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
-
     otherPlayer.setTint(0xD5D5D5);
-
+    // Add new enemy
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
     otherPlayer.setCollideWorldBounds(true);
@@ -136,7 +165,7 @@ function create() {
         player_jump = true;
       }
   
-      // emit player movement
+      // Emit player movement
       var x = this.player.x;
       var y = this.player.y;
       var r = this.player.rotation;
@@ -157,8 +186,19 @@ function create() {
           this.player.rotation = 0;
         }
       }
+
+      // Local animations
+      if (this.player.body.speed >= 100
+          && this.player.y >= 558
+          || this.player.body.speed >= 100 
+          && this.player.body.touching.down
+      ) {
+        this.player.anims.play('player-slide', true);
+      } else {
+        this.player.anims.play('player-stand', true);
+      }
   
-      // save old position data
+      // Save old position data
       this.player.oldPosition = {
         x: this.player.x,
         y: this.player.y,
