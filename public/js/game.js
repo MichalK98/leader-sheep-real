@@ -22,6 +22,7 @@ var game = new Phaser.Game(config);
 
 function preload() {
   this.load.image('sky', 'assets/sky.png');
+  this.load.image('intro', 'assets/intro.png');
   this.load.image('pipe', 'assets/pipe.png');
   this.load.spritesheet(
     'player',
@@ -32,6 +33,7 @@ function preload() {
   
 function create() {
     this.add.image(0, 0, 'sky').setOrigin(0, 0).setScrollFactor(0);
+    this.add.image(0, 0, 'intro').setOrigin(0, 0);
   
     pipes = this.physics.add.staticGroup();
     pipes.create(500, -200, 'pipe');
@@ -106,8 +108,8 @@ function create() {
   function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
 
-    otherPlayer.setTint(0x0000ff);
-  
+    otherPlayer.setTint(0xD5D5D5);
+
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
     otherPlayer.setCollideWorldBounds(true);

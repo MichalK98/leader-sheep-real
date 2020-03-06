@@ -6,6 +6,7 @@ var io = require('socket.io')({
 }).listen(server);
 
 var players = {};
+var pipes = {};
 var current_leader;
 
 app.use(express.static(__dirname + '/public'));
@@ -18,9 +19,9 @@ io.on('connection', function (socket) {
   console.log('a user connected: ', socket.id);
   // create a new player and add it to our players object
   players[socket.id] = {
-    rotation: 0,
-    x: Math.floor(Math.random() * 700) + 50,
-    y: Math.floor(Math.random() * 500) + 50,
+    rotation: 20,
+    x: Math.floor(Math.random() * 300) + 100,
+    y: 400,
     playerId: socket.id,
   };
 

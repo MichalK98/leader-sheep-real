@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js"
   },
-  "author": "Scott Westover",
+  "author": "Michal Kurowski",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.3",
