@@ -6,6 +6,7 @@ var io = require('socket.io')({
 }).listen(server);
 
 var players = {};
+var current_leader;
 
 app.use(express.static(__dirname + '/public'));
 
@@ -22,7 +23,7 @@ io.on('connection', function (socket) {
     y: Math.floor(Math.random() * 500) + 50,
     playerId: socket.id,
   };
-  
+
   // send the players object to the new player
   socket.emit('currentPlayers', players);
 
@@ -44,6 +45,19 @@ io.on('connection', function (socket) {
     players[socket.id].rotation = movementData.rotation;
     // emit a message to all players about the player that moved
     socket.broadcast.emit('playerMoved', players[socket.id]);
+    
+    const leader = Object.keys(players).reduce((acc, cur) => {
+      const obj = players[cur];
+      return acc.x < obj.x ? { x:obj.x, leader: obj.playerId } : acc;
+    }, { x: 0, leader: "" });
+
+    if (current_leader != leader.leader) {
+      // emit to everyone who the new leader is
+      socket.emit('playerLeader', leader.leader);
+      socket.broadcast.emit('playerLeader', leader.leader);
+    }
+
+    current_leader = leader.leader;
   });
 });
 

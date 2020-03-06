@@ -34,8 +34,9 @@ function create() {
     this.add.image(0, 0, 'sky').setOrigin(0, 0).setScrollFactor(0);
   
     pipes = this.physics.add.staticGroup();
-    pipes.create(600, 0, 'pipe');
-    pipes.create(100, 0, 'pipe');
+    pipes.create(500, -200, 'pipe');
+    pipes.create(1000, 600, 'pipe');
+    pipes.create(1500, 400, 'pipe');
   
     var self = this;
     this.socket = io({
@@ -91,32 +92,41 @@ function create() {
     self.player.setCollideWorldBounds(true);
     self.player.setBounce(.2);
   
-    console.log(self);
-    console.log(self.player);
-    console.log(pipes);
     self.physics.add.collider(self.player, pipes);
+
+    // Check if you are the leader
+    self.socket.on('playerLeader', function (leader) {
+      if (playerInfo.playerId == leader) {
+        // Camera follow player
+        self.cameras.main.startFollow(self.player);
+      }
+    });
   }
   
   function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
-  
-  
+
     otherPlayer.setTint(0x0000ff);
   
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
     otherPlayer.setCollideWorldBounds(true);
+
+    // Check if you are the leader
+    self.socket.on('playerLeader', function (leader) {
+      if (otherPlayer.playerId == leader) {
+        // Camera follow player
+        self.cameras.main.startFollow(otherPlayer);
+      }
+    });
   }
   
   function update() {
     if (this.player) {
-      // Camera Follow Player
-      this.cameras.main.startFollow(this.player);
-  
       // Jump
       if (this.cursors.up.isDown) {
         if (player_jump) {
-          this.player.setVelocityX(-200);
+          this.player.setVelocityX(200);
           this.player.setVelocityY(-400);
           player_jump = false;
         }
