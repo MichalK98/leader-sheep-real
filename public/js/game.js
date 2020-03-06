@@ -50,25 +50,25 @@ function create() {
       repeat: -1
     });
   
-    pipes = this.physics.add.staticGroup();
-    pipes.create(500, -200, 'pipe');
-    pipes.create(650, 600, 'pipe');
-    pipes.create(700, 600, 'pipe');
-    pipes.create(750, 600, 'pipe');
-    pipes.create(800, 600, 'pipe');
-    pipes.create(850, 600, 'pipe');
-    pipes.create(900, 600, 'pipe');
-    pipes.create(950, 600, 'pipe');
-    pipes.create(1000, 600, 'pipe');
-    pipes.create(1050, 600, 'pipe');
-    pipes.create(1100, 600, 'pipe');
-    pipes.create(1150, 600, 'pipe');
-    pipes.create(1200, 600, 'pipe');
-    pipes.create(1250, 600, 'pipe');
-    pipes.create(1300, 600, 'pipe');
-    pipes.create(1350, 600, 'pipe');
-    pipes.create(1400, 600, 'pipe');
-    pipes.create(1550, 400, 'pipe');
+    pipe = this.physics.add.staticGroup();
+    pipe.create(500, -200, 'pipe');
+    pipe.create(650, 600, 'pipe');
+    pipe.create(700, 600, 'pipe');
+    pipe.create(750, 600, 'pipe');
+    pipe.create(800, 600, 'pipe');
+    pipe.create(850, 600, 'pipe');
+    pipe.create(900, 600, 'pipe');
+    pipe.create(950, 600, 'pipe');
+    pipe.create(1000, 600, 'pipe');
+    pipe.create(1050, 600, 'pipe');
+    pipe.create(1100, 600, 'pipe');
+    pipe.create(1150, 600, 'pipe');
+    pipe.create(1200, 600, 'pipe');
+    pipe.create(1250, 600, 'pipe');
+    pipe.create(1300, 600, 'pipe');
+    pipe.create(1350, 600, 'pipe');
+    pipe.create(1400, 600, 'pipe');
+    pipe.create(1550, 400, 'pipe');
   
     var self = this;
     this.socket = io({
@@ -124,7 +124,7 @@ function create() {
     self.player.setCollideWorldBounds(true);
     self.player.setBounce(.2);
   
-    self.physics.add.collider(self.player, pipes);
+    self.physics.add.collider(self.player, pipe);
 
     // Check if you are the leader
     self.socket.on('playerLeader', function (leader) {
@@ -137,11 +137,13 @@ function create() {
   
   function addOtherPlayers(self, playerInfo) {
     const otherPlayer = self.physics.add.sprite(playerInfo.x, playerInfo.y, 'player').setScale(.5);;
-    otherPlayer.setTint(0xD5D5D5);
+    otherPlayer.setTint(0x545454);
     // Add new enemy
     otherPlayer.playerId = playerInfo.playerId;
     self.otherPlayers.add(otherPlayer);
     otherPlayer.setCollideWorldBounds(true);
+
+    self.physics.add.collider(otherPlayer, pipe);
 
     // Check if you are the leader
     self.socket.on('playerLeader', function (leader) {
