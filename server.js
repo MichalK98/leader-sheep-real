@@ -6,8 +6,32 @@ var io = require('socket.io')({
 }).listen(server);
 
 var players = {};
-var pipes = {};
 var current_leader;
+var current_leader_x;
+
+var pipes = {};
+
+const pipe_height = 600;
+const pipe_marginal = 50;
+const pipe_gap = 100;
+
+const pipe_min = -300 + pipe_marginal;
+const pipe_max =  200 + pipe_marginal - pipe_gap;
+
+for(let i = 1; i < 10; i++) {
+  pipe_random = Math.random() * (pipe_max - pipe_min) + pipe_min;
+
+  pipes[i] = {
+    top: {
+      x: i * 500,
+      y: pipe_random
+    },
+    bot: {
+      x: i * 500,
+      y: pipe_random + pipe_height + pipe_gap
+    }
+  };
+}
 
 app.use(express.static(__dirname + '/public'));
 
@@ -33,6 +57,9 @@ io.on('connection', function (socket) {
 
   // camera follow
   socket.emit('playerLeader', current_leader);
+
+  // pipes
+  socket.emit('pipes', pipes);
 
   // when a player disconnects, remove them from our players object
   socket.on('disconnect', function () {
@@ -61,7 +88,12 @@ io.on('connection', function (socket) {
       socket.broadcast.emit('playerLeader', leader.leader);
     }
 
+    if (current_leader_x) {
+      // console.log(current_leader_x);
+    }
+
     current_leader = leader.leader;
+    current_leader_x = leader.x;
   });
 });
 

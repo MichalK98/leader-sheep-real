@@ -35,6 +35,9 @@ function create() {
     this.add.image(0, 0, 'sky').setOrigin(0, 0).setScrollFactor(0);
     this.add.image(0, 0, 'intro').setOrigin(0, 0);
 
+    // pipe group
+    pipe = this.physics.add.staticGroup();
+
     this.anims.create({
       key: 'player-stand',
       frames: this.anims.generateFrameNumbers('player', { start: 0, end: 0 }),
@@ -49,33 +52,13 @@ function create() {
       frameRate: 10,
       repeat: -1
     });
-  
-    pipe = this.physics.add.staticGroup();
-    pipe.create(500, -200, 'pipe');
-    pipe.create(650, 600, 'pipe');
-    pipe.create(700, 600, 'pipe');
-    pipe.create(750, 600, 'pipe');
-    pipe.create(800, 600, 'pipe');
-    pipe.create(850, 600, 'pipe');
-    pipe.create(900, 600, 'pipe');
-    pipe.create(950, 600, 'pipe');
-    pipe.create(1000, 600, 'pipe');
-    pipe.create(1050, 600, 'pipe');
-    pipe.create(1100, 600, 'pipe');
-    pipe.create(1150, 600, 'pipe');
-    pipe.create(1200, 600, 'pipe');
-    pipe.create(1250, 600, 'pipe');
-    pipe.create(1300, 600, 'pipe');
-    pipe.create(1350, 600, 'pipe');
-    pipe.create(1400, 600, 'pipe');
-    pipe.create(1550, 400, 'pipe');
-  
+    
     var self = this;
     this.socket = io({
       transports: ["websocket"]
     });
     this.otherPlayers = this.physics.add.group();
-  
+
     this.socket.on('currentPlayers', function (players) {
       Object.keys(players).forEach(function (id) {
         if (players[id].playerId === self.socket.id) {
@@ -104,6 +87,17 @@ function create() {
           otherPlayer.setRotation(playerInfo.rotation);
           otherPlayer.setPosition(playerInfo.x, playerInfo.y);
         }
+      });
+    });
+
+    this.socket.on('pipes', function (pipes) {
+      console.log(pipes);
+      const pipes_array = Object.values(pipes);
+      pipes_array.forEach(e => {
+        // top pipe
+        pipe.create(e.top.x, e.top.y, 'pipe');
+        // bot pipe
+        pipe.create(e.bot.x, e.bot.y, 'pipe');
       });
     });
     
